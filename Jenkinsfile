@@ -34,6 +34,11 @@ pipeline {
                         }
                     }
                 }
+catch (Exception e) {
+                echo "Failed to push Docker image to ECR: ${e.message}"
+                currentBuild.result = 'FAILURE'
+                error 'Failed to push Docker image to ECR'
+            }}
             }
         }
 
