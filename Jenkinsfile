@@ -16,17 +16,29 @@ pipeline {
             }
         }
         
-        stage('Build Docker Image') {
-            steps {
-                echo 'Building Docker image...'
-                script {
-                    docker.build("htmllatestpage:${IMAGE_TAG}")
-                    docker.withRegistry(ECR_REGISTRY, "${AWS_CREDENTIALS_ID}") {
-                        docker.image("htmllatestpage:${IMAGE_TAG}").push()
-                    }
+     stage('Build Docker Image') {
+    steps {
+        echo 'Building Docker image...'
+        script {
+            def dockerImage = docker.build("htmllatestpage:${IMAGE_TAG}")
+
+            // Pushing Docker image to ECR
+            withCredentials([[
+                $class: 'AmazonWebServicesCredentialsBinding',
+                credentialsId: "${AWS_CREDENTIALS_ID}",
+                accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+            ]]) {
+                docker.withRegistry(ECR_REGISTRY, 'ecr') {
+                    dockerImage.push()
                 }
             }
         }
+    }
+      echo 'Building Docker image...Done'
+
+}
+
         
          stage('Push to ECR') {
             steps {
