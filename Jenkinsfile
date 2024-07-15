@@ -21,7 +21,7 @@ pipeline {
                 echo 'Building Docker image...'
                 script {
                     docker.build("htmllatestpage:${IMAGE_TAG}")
-                    docker.withRegistry(ECR_REGISTRY, 'ecr:your-ecr-credentials-id') {
+                    docker.withRegistry(ECR_REGISTRY, "${AWS_CREDENTIALS_ID}") {
                         docker.image("htmllatestpage:${IMAGE_TAG}").push()
                     }
                 }
@@ -33,7 +33,7 @@ pipeline {
                 echo 'Pushing Docker image to ECR...'
                 script {
                     def dockerImage = docker.image("htmllatestpage:${IMAGE_TAG}")
-                    docker.withRegistry(ECR_REGISTRY, 'ecr:your-ecr-credentials-id') {
+                    docker.withRegistry(ECR_REGISTRY, "${AWS_CREDENTIALS_ID}") {
                         dockerImage.push()
                     }
                 }
