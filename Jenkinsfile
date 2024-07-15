@@ -16,36 +16,22 @@ pipeline {
             }
         }
         
-     stage('Build Docker Image') {
-    steps {
-        echo 'Building Docker image...'
-        script {
-            def dockerImage = docker.build("htmllatestpage:${IMAGE_TAG}")
-
-            // Pushing Docker image to ECR
-            withCredentials([[
-                $class: 'AmazonWebServicesCredentialsBinding',
-                credentialsId: "${AWS_CREDENTIALS_ID}",
-                accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-            ]]) {
-                docker.withRegistry(ECR_REGISTRY, 'ecr') {
-                    dockerImage.push()
-                }
-            }
-        }
-    }
-}
-
-
-        
-         stage('Push to ECR') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Pushing Docker image to ECR...'
+                echo 'Building Docker image...'
                 script {
-                    def dockerImage = docker.image("htmllatestpage:${IMAGE_TAG}")
-                    docker.withRegistry(ECR_REGISTRY, "${AWS_CREDENTIALS_ID}") {
-                        dockerImage.push()
+                    def dockerImage = docker.build("htmllatestpage:${IMAGE_TAG}")
+
+                    // Pushing Docker image to ECR
+                    withCredentials([[
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'aws-ecr-credentials',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]]) {
+                        docker.withRegistry(ECR_REGISTRY, 'ecr') {
+                            dockerImage.push()
+                        }
                     }
                 }
             }
@@ -65,8 +51,8 @@ pipeline {
                 }
             }
         }
-    
-    stage('Automated Tests') {
+        
+        stage('Automated Tests') {
             steps {
                 echo 'Running automated tests...'
                 // Add automated tests here
@@ -92,5 +78,4 @@ pipeline {
         }
     }
 }
-
 
