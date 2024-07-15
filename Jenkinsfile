@@ -35,8 +35,6 @@ pipeline {
             }
         }
     }
-      echo 'Building Docker image...Done'
-
 }
 
         
