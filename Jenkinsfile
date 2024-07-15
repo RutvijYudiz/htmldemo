@@ -16,40 +16,70 @@ pipeline {
             }
         }
         
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
+                echo 'Building Docker image...'
                 script {
-                    docker.build("${ECR_REGISTRY}/htmllatestpage:${IMAGE_TAG}", 'docker/')
-                }
-            }
-      
-           
-        }
-        
-        stage('Push to ECR') {
-            steps {
-                script {
-                    docker.withRegistry("https://${ECR_REGISTRY}", "${AWS_CREDENTIALS_ID}") {
-                        docker.image("${ECR_REGISTRY}/htmllatestpage:${IMAGE_TAG}").push()
+                    docker.build("htmllatestpage:${IMAGE_TAG}")
+                    docker.withRegistry(ECR_REGISTRY, 'ecr:your-ecr-credentials-id') {
+                        docker.image("htmllatestpage:${IMAGE_TAG}").push()
                     }
                 }
             }
         }
         
-        stage('Deploy to Kubernetes') {
+         stage('Push to ECR') {
             steps {
+                echo 'Pushing Docker image to ECR...'
                 script {
-                    sh "kubectl --kubeconfig=\$KUBE_CONFIG apply -f htmllatestpagedeployment.yaml"
-                    sh "kubectl --kubeconfig=\$KUBE_CONFIG apply -f htmllatestpageservice.yaml"
+                    def dockerImage = docker.image("htmllatestpage:${IMAGE_TAG}")
+                    docker.withRegistry(ECR_REGISTRY, 'ecr:your-ecr-credentials-id') {
+                        dockerImage.push()
+                    }
                 }
             }
         }
-    }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo 'Deploying to Kubernetes...'
+                script {
+                    withCredentials([file(credentialsId: 'kubeconfig-creds', variable: 'KUBECONFIG')]) {
+                        sh """
+                        export KUBECONFIG=\$KUBECONFIG
+                        kubectl apply -f path/to/htmllatestpagedeployment.yaml
+                        kubectl apply -f path/to/htmllatestpageservice.yaml
+                        """
+                    }
+                }
+            }
+        }
     
-    post {
-        always {
-            cleanWs()
+    stage('Automated Tests') {
+            steps {
+                echo 'Running automated tests...'
+                // Add automated tests here
+            }
+        }
+
+        stage('Monitor and Notify') {
+            steps {
+                echo 'Monitoring and notification setup...'
+                // Integrate with monitoring and alerting tools
+            }
         }
     }
+
+    post {
+        success {
+            echo 'Deployment successful!'
+            // Notify stakeholders or perform post-deployment actions
+        }
+        failure {
+            echo 'Deployment failed!'
+            // Send alerts or rollback actions
+        }
+    }
+}
 }
 
