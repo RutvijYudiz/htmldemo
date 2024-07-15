@@ -29,16 +29,11 @@ pipeline {
                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                     ]]) {
-                        docker.withRegistry(ECR_REGISTRY, 'ecr') {
+                        docker.withRegistry(ECR_REGISTRY, 'aws-ecr-credentials') {
                             dockerImage.push()
                         }
                     }
-                }
-catch (Exception e) {
-                echo "Failed to push Docker image to ECR: ${e.message}"
-                currentBuild.result = 'FAILURE'
-                error 'Failed to push Docker image to ECR'
-            }}
+             
             }
         }
 
