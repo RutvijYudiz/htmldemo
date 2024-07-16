@@ -64,11 +64,12 @@ pipeline {
                     ]
                 ]) {
                     // Apply Kubernetes deployment and service manifests
-                    sh "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:.*|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
+              
                     
                     echo "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:.*|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
 
-
+                    // Update image for the Kubernetes deployment
+                    sh "kubectl set image deployment/htmllatestpage-deployment htmllatestpage=${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
                     sh "kubectl apply -f ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
                     sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpageservice.yaml"
                 }
