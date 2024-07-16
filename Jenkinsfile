@@ -51,10 +51,10 @@ pipeline {
   
 
         stage('Deploy to Kubernetes') {
-        steps {
+    steps {
         script {
             // Set KUBECONFIG environment variable
-            withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
+            withEnv(['KUBECONFIG=${KUBE_CONFIG}']) {
                 // Bind AWS credentials for kubectl
                 withCredentials([
                     [ $class: 'AmazonWebServicesCredentialsBinding',
@@ -63,30 +63,20 @@ pipeline {
                       secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                     ]
                 ]) {
+                    // Substitute the image name in the Kubernetes deployment manifest
+                    sh "sed -i 's|image: .*|image: ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
+
                     // Apply Kubernetes deployment and service manifests
-              
-                    
-                    echo "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:.*|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
-
-                    // Update image for the Kubernetes deployment
-                    sh "kubectl set image deployment/htmllatestpage-deployment htmllatestpage=${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
                     sh "kubectl apply -f ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
-                    sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpageservice.yaml"
+                    sh "kubectl apply -f ${MANIFESTS_PATH}/htmllatestpageservice.yaml"
 
-
-
-
-                      echo "kubectl set image deployment/htmllatestpage-deployment htmllatestpage=${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-                      echo "Deploying image: ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-                      sh "kubectl describe deployment htmllatestpage-deployment"
-
-
+                    // Optional: Describe deployment for debugging
+                    sh "kubectl describe deployment htmllatestpage-deployment"
                 }
             }
         }
     }
 }
-
 
     
         stage('Automated Tests') {
