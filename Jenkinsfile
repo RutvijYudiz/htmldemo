@@ -86,6 +86,7 @@ pipeline {
         }
         failure {
             echo 'Deployment failed!'
+
             // Send alerts or rollback actions
         }
     }
