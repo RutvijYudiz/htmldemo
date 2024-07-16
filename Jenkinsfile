@@ -8,6 +8,7 @@ pipeline {
         IMAGE_TAG = "${env.BUILD_NUMBER}"  // Set your Docker image tag
         KUBE_CONFIG = "/var/lib/jenkins/.kube/config"  // Path to Kubernetes config
         AWS_CREDENTIALS_ID = 'aws-ecr-credentials'  // Jenkins credentials ID for AWS
+        MANIFESTS_PATH = '/var/lib/jenkins/k8s-manifests'
     }
     
     stages {
@@ -50,8 +51,11 @@ pipeline {
         stage('Update Deployment.yaml') {
             steps {
                 script {
+                    echo "Updating Deployment.yaml at ${MANIFESTS_PATH}/Deployment.yaml"
+
+
                     // Replace ${IMAGE_TAG} in Deployment.yaml with actual image tag
-                    sh "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:\${IMAGE_TAG}|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/Deployment.yaml"
+                    sh "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:\${IMAGE_TAG}|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
                 }
             }
         }
