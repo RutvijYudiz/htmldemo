@@ -59,7 +59,8 @@ pipeline {
                       credentialsId: 'aws-ecr-credentials',
                       accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                       secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]
+                  
+  ]
                 ]) {
                     // Apply Kubernetes deployment and service manifests
                     sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpagedeployment.yaml"
