@@ -78,6 +78,8 @@ pipeline {
 
                       echo "kubectl set image deployment/htmllatestpage-deployment htmllatestpage=${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
                       echo "Deploying image: ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                      sh "kubectl describe deployment htmllatestpage-deployment"
+
 
 
                 }
