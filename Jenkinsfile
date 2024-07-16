@@ -12,39 +12,39 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                echo 'Checking out code...'
                 checkout scm
             }
         }
         
         stage('Build Docker Image') {
-    steps {
-        echo 'Building Docker image...'
-        script {
-            def dockerImage = docker.build("htmllatestpage:${BUILD_NUMBER}")
+            steps {
+                echo 'Building Docker image...'
+                script {
+                    def dockerImage = docker.build("htmllatestpage:${BUILD_NUMBER}")
 
-            // Tag the image with ECR registry URL
-            def imageTag = "${ECR_REGISTRY}/htmllatestpage:${BUILD_NUMBER}"
-            dockerImage.tag("${imageTag}")
+                    // Tag the image with ECR registry URL
+                    def imageTag = "${ECR_REGISTRY}/htmllatestpage:${BUILD_NUMBER}"
+                    dockerImage.tag(imageTag)
 
-            // Authenticate Docker client to ECR
-            withCredentials([
-                [
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-ecr-credentials',
-                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                ]
-            ]) {
-                // Login to ECR
-                sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
+                    // Authenticate Docker client to ECR
+                    withCredentials([
+                        [
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'aws-ecr-credentials',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                    ]) {
+                        // Login to ECR
+                        sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
 
-                // Push the Docker image to ECR
-                sh "docker push ${imageTag}"
+                        // Push the Docker image to ECR
+                        sh "docker push ${imageTag}"
+                    }
+                }
             }
         }
-    }
-}
-
 
         stage('Deploy to Kubernetes') {
             steps {
