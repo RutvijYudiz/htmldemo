@@ -16,14 +16,14 @@ pipeline {
             }
         }
         
-stage('Build Docker Image') {
+        stage('Build Docker Image') {
     steps {
         echo 'Building Docker image...'
         script {
-            def dockerImage = docker.build("htmllatestpage:${IMAGE_TAG}")
+            def dockerImage = docker.build("htmllatestpage:${BUILD_NUMBER}")
 
             // Tag the image with ECR registry URL
-            def imageTag = "${ECR_REGISTRY}/htmllatestpage:${IMAGE_TAG}"
+            def imageTag = "${ECR_REGISTRY}/htmllatestpage:${BUILD_NUMBER}"
             dockerImage.tag("${imageTag}")
 
             // Authenticate Docker client to ECR
@@ -39,7 +39,7 @@ stage('Build Docker Image') {
                 sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
 
                 // Push the Docker image to ECR
-                sh "docker push ${ECR_REGISTRY}/htmllatestpage:${IMAGE_TAG}"
+                sh "docker push ${imageTag}"
             }
         }
     }
