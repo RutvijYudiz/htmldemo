@@ -48,22 +48,10 @@ pipeline {
             }
         }
 
-        stage('Update Deployment.yaml') {
-            steps {
-                script {
-
-                    // Replace ${IMAGE_TAG} in Deployment.yaml with actual image tag
-                    sh "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:\${IMAGE_TAG}|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
-                    
-                    echo "Updating Deployment.yaml at ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
-                    echo "BUILDNUMBER898998  ${IMAGE_TAG}"
-
-                }
-            }
-        }
+  
 
         stage('Deploy to Kubernetes') {
-    steps {
+        steps {
         script {
             // Set KUBECONFIG environment variable
             withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
@@ -73,11 +61,11 @@ pipeline {
                       credentialsId: 'aws-ecr-credentials',
                       accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                       secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                  
-  ]
+                    ]
                 ]) {
                     // Apply Kubernetes deployment and service manifests
-                    sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpagedeployment.yaml"
+                    sh "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:.*|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
+                    sh "kubectl apply -f ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
                     sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpageservice.yaml"
                 }
             }
@@ -85,8 +73,8 @@ pipeline {
     }
 }
 
+
     
-        
         stage('Automated Tests') {
             steps {
                 echo 'Running automated tests...'
