@@ -49,17 +49,27 @@ pipeline {
 
 
         stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    // Set KUBECONFIG environment variable
-                    withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
-                        // Apply Kubernetes deployment and service manifests
-                        sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpagedeployment.yaml"
-                        sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpageservice.yaml"
-                    }
+    steps {
+        script {
+            // Set KUBECONFIG environment variable
+            withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
+                // Bind AWS credentials for kubectl
+                withCredentials([
+                    [ $class: 'AmazonWebServicesCredentialsBinding',
+                      credentialsId: 'aws-ecr-credentials',
+                      accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                      secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]
+                ]) {
+                    // Apply Kubernetes deployment and service manifests
+                    sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpagedeployment.yaml"
+                    sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpageservice.yaml"
                 }
             }
         }
+    }
+}
+
     
         
         stage('Automated Tests') {
