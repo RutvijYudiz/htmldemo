@@ -21,10 +21,10 @@ pipeline {
             steps {
                 echo 'Building Docker image...'
                 script {
-                    def dockerImage = docker.build("htmllatestpage:${BUILD_NUMBER}")
+                    def dockerImage = docker.build("htmllatestpage:${IMAGE_TAG}")
 
                     // Tag the image with ECR registry URL
-                    def imageTag = "${ECR_REGISTRY}/htmllatestpage:${BUILD_NUMBER}"
+                    def imageTag = "${ECR_REGISTRY}/htmllatestpage:${IMAGE_TAG}"
                     dockerImage.tag(imageTag)
 
                     // Authenticate Docker client to ECR
