@@ -21,17 +21,25 @@ pipeline {
                 echo 'Building Docker image...'
                 script {
                     def dockerImage = docker.build("htmllatestpage:${IMAGE_TAG}")
-
-                    // Pushing Docker image to ECR
-                    withCredentials([[
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: 'aws-ecr-credentials',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]]) {
-                        docker.withRegistry(ECR_REGISTRY, 'aws-ecr-credentials') {
-                            dockerImage.push()
-                        }
+                    
+                    // Tag the image with ECR registry URL
+                    def imageTag = "${ECR_REGISTRY}/htmllatestpage:${IMAGE_TAG}"
+                    dockerImage.tag(imageTag)
+                    
+                    // Authenticate Docker client to ECR
+                    withCredentials([
+                        [
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'aws-ecr-credentials',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                    ]) {
+                        // Login to ECR
+                        sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
+                        
+                        // Push the Docker image to ECR
+                        sh "docker push ${imageTag}"
                     }
                 }
             }
@@ -41,12 +49,14 @@ pipeline {
             steps {
                 echo 'Deploying to Kubernetes...'
                 script {
+                    // Load kubeconfig from Jenkins credentials
                     withCredentials([file(credentialsId: 'kubeconfig-creds', variable: 'KUBECONFIG')]) {
-                        sh """
-                        export KUBECONFIG=\$KUBECONFIG
-                        kubectl apply -f path/to/htmllatestpagedeployment.yaml
-                        kubectl apply -f path/to/htmllatestpageservice.yaml
-                        """
+                        // Set KUBECONFIG environment variable
+                        sh "export KUBECONFIG=\$KUBECONFIG"
+                        
+                        // Apply Kubernetes deployment and service manifests
+                        sh "kubectl apply -f path/to/htmllatestpagedeployment.yaml"
+                        sh "kubectl apply -f path/to/htmllatestpageservice.yaml"
                     }
                 }
             }
@@ -73,9 +83,9 @@ pipeline {
             // Notify stakeholders or perform post-deployment actions
         }
         failure {
-            echo 'Deployment failed!' 
-    // Send alerts or rollback actions     
-   }
-  }
+            echo 'Deployment failed!'
+            // Send alerts or rollback actions
+        }
+    }
 }
 
