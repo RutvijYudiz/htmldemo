@@ -1,15 +1,14 @@
 pipeline {
     agent any
-    
+
     environment {
-        AWS_DEFAULT_REGION = 'ap-south-1'  // Set your AWS region
-        ECR_REGISTRY = '851725603941.dkr.ecr.ap-south-1.amazonaws.com'  // Set your ECR registry URL
-        IMAGE_NAME = 'htmllatestpage'  // Set your Docker image name
-        IMAGE_TAG = "${env.BUILD_NUMBER}"  // Set your Docker image tag
-        KUBE_CONFIG = "/var/lib/jenkins/.kube/config"  // Path to Kubernetes config
+        AWS_DEFAULT_REGION = 'ap-south-1'  // AWS region
+        ECR_REGISTRY = '851725603941.dkr.ecr.ap-south-1.amazonaws.com'  // ECR registry URL
+        IMAGE_NAME = 'htmllatestpage'  // Docker image name
+        IMAGE_TAG = "${env.BUILD_NUMBER}"  // Docker image tag
         AWS_CREDENTIALS_ID = 'aws-ecr-credentials'  // Jenkins credentials ID for AWS
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
@@ -17,7 +16,7 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
@@ -40,21 +39,19 @@ pipeline {
             }
         }
 
-        
-                stage('Deploy to Kubernetes') {
+        stage('Deploy to Kubernetes') {
             steps {
                 script {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                       credentialsId: AWS_CREDENTIALS_ID,
                                       accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                                       secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                
-                        sh "kubectl set image deployment/htmllatestpage-deployment ${IMAGE_NAME}=${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --record"
+                        // Set the image of the existing deployment to the new image
+                        sh "kubectl set image deployment/${IMAGE_NAME}-deployment ${IMAGE_NAME}=${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --record"
                     }
                 }
             }
         }
-       
 
         stage('Automated Tests') {
             steps {
