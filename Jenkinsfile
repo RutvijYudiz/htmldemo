@@ -2,12 +2,12 @@ pipeline {
     agent any
     
     environment {
-        AWS_DEFAULT_REGION = 'ap-south-1'
-        ECR_REGISTRY = '851725603941.dkr.ecr.ap-south-1.amazonaws.com'
-        IMAGE_NAME = 'htmllatestpage'
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
-        KUBE_CONFIG = "/var/lib/jenkins/.kube/config"
-        AWS_CREDENTIALS_ID = 'aws-ecr-credentials'
+        AWS_DEFAULT_REGION = 'ap-south-1'  // Set your AWS region
+        ECR_REGISTRY = '851725603941.dkr.ecr.ap-south-1.amazonaws.com/htmllatestpage'  // Set your ECR registry URL
+        IMAGE_NAME = 'htmllatestpage'  // Set your Docker image name
+        IMAGE_TAG = 'latest'  // Set your Docker image tag
+        KUBE_CONFIG = "/var/lib/jenkins/.kube/config"  // Path to Kubernetes config
+        AWS_CREDENTIALS_ID = 'aws-ecr-credentials'  // Jenkins credentials ID for AWS
     }
     
     stages {
@@ -22,10 +22,11 @@ pipeline {
             steps {
                 echo 'Building Docker image...'
                 script {
+                    // Build Docker image
                     def dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
 
                     // Tag the image for ECR
-                    def ecrImage = "${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    def ecrImage = "${ECR_REGISTRY}:${IMAGE_TAG}"
                     dockerImage.tag(ecrImage)
 
                     // Authenticate Docker client to ECR
@@ -57,8 +58,8 @@ pipeline {
                         sh "export KUBECONFIG=\$KUBECONFIG"
                         
                         // Apply Kubernetes deployment and service manifests
-                        sh "kubectl apply -f path/to/htmllatestpagedeployment.yaml"
-                        sh "kubectl apply -f path/to/htmllatestpageservice.yaml"
+                        sh "kubectl apply -f path/to/your/deployment.yaml"
+                        sh "kubectl apply -f path/to/your/service.yaml"
                     }
                 }
             }
