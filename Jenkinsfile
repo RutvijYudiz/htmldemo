@@ -52,7 +52,7 @@ pipeline {
             steps {
                 script {
                     // Set KUBECONFIG environment variable
-                    withEnv(['KUBECONFIG=$KUBECONFIG']) {
+                    withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                         // Apply Kubernetes deployment and service manifests
                         sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpagedeployment.yaml"
                         sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpageservice.yaml"
