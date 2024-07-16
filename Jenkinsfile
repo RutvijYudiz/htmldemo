@@ -57,7 +57,7 @@ pipeline {
                     
                     echo "Updating Deployment.yaml at ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
 
-                    echo "BUILDNUMBER898998  ${IMAGE_TAG}
+                    echo "BUILDNUMBER898998  ${IMAGE_TAG}"
 
                 }
             }
