@@ -4,6 +4,7 @@ pipeline {
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
         ECR_REGISTRY = '851725603941.dkr.ecr.ap-south-1.amazonaws.com'
+        IMAGE_NAME = 'htmllatestpage'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
         KUBE_CONFIG = "/var/lib/jenkins/.kube/config"
         AWS_CREDENTIALS_ID = 'aws-ecr-credentials'
@@ -21,11 +22,11 @@ pipeline {
             steps {
                 echo 'Building Docker image...'
                 script {
-                    def dockerImage = docker.build("${IMAGE_TAG}")
+                    def dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
 
-                    // Tag the image with ECR registry URL
-                    def imageTag = "${ECR_REGISTRY}/htmllatestpage:${IMAGE_TAG}"
-                    dockerImage.tag(imageTag)
+                    // Tag the image for ECR
+                    def ecrImage = "${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    dockerImage.tag(ecrImage)
 
                     // Authenticate Docker client to ECR
                     withCredentials([
@@ -40,7 +41,7 @@ pipeline {
                         sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
 
                         // Push the Docker image to ECR
-                        sh "docker push ${imageTag}"
+                        sh "docker push ${ecrImage}"
                     }
                 }
             }
