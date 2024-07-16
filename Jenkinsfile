@@ -56,7 +56,6 @@ pipeline {
             }
         }
 
-
         stage('Deploy to Kubernetes') {
     steps {
         script {
