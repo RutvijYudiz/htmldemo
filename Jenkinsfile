@@ -53,9 +53,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
     steps {
         script {
-            // Set KUBECONFIG environment variable
             withEnv(['KUBECONFIG=${KUBE_CONFIG}']) {
-                // Bind AWS credentials for kubectl
                 withCredentials([
                     [ $class: 'AmazonWebServicesCredentialsBinding',
                       credentialsId: 'aws-ecr-credentials',
@@ -70,13 +68,14 @@ pipeline {
                     sh "kubectl apply -f ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
                     sh "kubectl apply -f ${MANIFESTS_PATH}/htmllatestpageservice.yaml"
 
-                    // Optional: Describe deployment for debugging
+                    // Describe deployment for debugging
                     sh "kubectl describe deployment htmllatestpage-deployment"
                 }
             }
         }
     }
 }
+
 
     
         stage('Automated Tests') {
