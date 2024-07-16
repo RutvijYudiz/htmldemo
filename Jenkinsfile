@@ -21,7 +21,7 @@ pipeline {
             steps {
                 echo 'Building Docker image...'
                 script {
-                    def dockerImage = docker.build("htmllatestpage:${IMAGE_TAG}")
+                    def dockerImage = docker.build("${ECR_REGISTRY}/htmllatestpage:${IMAGE_TAG}")
 
                     // Tag the image with ECR registry URL
                     def imageTag = "${ECR_REGISTRY}/htmllatestpage:${IMAGE_TAG}"
