@@ -51,11 +51,14 @@ pipeline {
         stage('Update Deployment.yaml') {
             steps {
                 script {
-                    echo "Updating Deployment.yaml at ${MANIFESTS_PATH}/Deployment.yaml"
-
 
                     // Replace ${IMAGE_TAG} in Deployment.yaml with actual image tag
                     sh "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:\${IMAGE_TAG}|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
+                    
+                    echo "Updating Deployment.yaml at ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
+
+                    echo "BUILDNUMBER898998  ${IMAGE_TAG}
+
                 }
             }
         }
