@@ -47,6 +47,15 @@ pipeline {
             }
         }
 
+        stage('Update Deployment.yaml') {
+            steps {
+                script {
+                    // Replace ${IMAGE_TAG} in Deployment.yaml with actual image tag
+                    sh "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:\${IMAGE_TAG}|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/Deployment.yaml"
+                }
+            }
+        }
+
 
         stage('Deploy to Kubernetes') {
     steps {
