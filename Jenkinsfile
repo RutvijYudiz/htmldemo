@@ -4,7 +4,7 @@ pipeline {
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
         ECR_REGISTRY = '851725603941.dkr.ecr.ap-south-1.amazonaws.com'
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
         KUBE_CONFIG = "/var/lib/jenkins/.kube/config"
         AWS_CREDENTIALS_ID = 'aws-ecr-credentials'
     }
