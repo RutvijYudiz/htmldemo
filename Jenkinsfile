@@ -81,7 +81,6 @@ pipeline {
                       sh "kubectl describe deployment htmllatestpage-deployment"
 
 
-
                 }
             }
         }
