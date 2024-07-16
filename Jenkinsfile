@@ -8,7 +8,6 @@ pipeline {
         IMAGE_TAG = "${env.BUILD_NUMBER}"  // Set your Docker image tag
         KUBE_CONFIG = "/var/lib/jenkins/.kube/config"  // Path to Kubernetes config
         AWS_CREDENTIALS_ID = 'aws-ecr-credentials'  // Jenkins credentials ID for AWS
-        MANIFESTS_PATH = '/var/lib/jenkins/k8s-manifests'
     }
     
     stages {
@@ -44,7 +43,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
+                    withEnv(['KUBECONFIG=${KUBE_CONFIG}']) {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                           credentialsId: AWS_CREDENTIALS_ID,
                                           accessKeyVariable: 'AWS_ACCESS_KEY_ID',
@@ -52,16 +51,9 @@ pipeline {
                             
                             // Validate access to Kubernetes
                             sh "kubectl get nodes"
-                            
-                            // Substitute the image name in the Kubernetes deployment manifest
-                            sh "sed -i 's|image: .*|image: ${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
 
-                            // Apply Kubernetes deployment and service manifests
-                            sh "kubectl apply -f ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
-                            sh "kubectl apply -f ${MANIFESTS_PATH}/htmllatestpageservice.yaml"
-
-                            // Describe deployment for debugging
-                            sh "kubectl describe deployment htmllatestpage-deployment"
+                            // Update the deployment image using a label selector
+                            sh "kubectl set image deployment -l app=${IMAGE_NAME} ${IMAGE_NAME}=${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --record"
                         }
                     }
                 }
