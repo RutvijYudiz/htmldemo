@@ -40,25 +40,21 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        
+                stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    withEnv(['KUBECONFIG=${KUBE_CONFIG}']) {
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                                          credentialsId: AWS_CREDENTIALS_ID,
-                                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-                            
-                            // Validate access to Kubernetes
-                            sh "kubectl get nodes"
-
-                            // Update the deployment image using a label selector
-                            sh "kubectl set image deployment -l app=${IMAGE_NAME} ${IMAGE_NAME}=${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --record"
-                        }
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                                      credentialsId: AWS_CREDENTIALS_ID,
+                                      accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                                      secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                
+                        sh "kubectl set image deployment/htmllatestpage-deployment ${IMAGE_NAME}=${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --record"
                     }
                 }
             }
         }
+       
 
         stage('Automated Tests') {
             steps {
