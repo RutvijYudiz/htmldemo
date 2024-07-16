@@ -54,8 +54,8 @@ pipeline {
                     // Set KUBECONFIG environment variable
                     withEnv(['KUBECONFIG=$KUBECONFIG']) {
                         // Apply Kubernetes deployment and service manifests
-                        sh "kubectl apply -f path/to/your/deployment.yaml"
-                        sh "kubectl apply -f path/to/your/service.yaml"
+                        sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpagedeployment.yaml"
+                        sh "kubectl apply -f /var/lib/jenkins/k8s-manifests/htmllatestpageservice.yaml"
                     }
                 }
             }
