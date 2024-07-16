@@ -56,7 +56,6 @@ pipeline {
                     sh "sed -i 's|${ECR_REGISTRY}/${IMAGE_NAME}:\${IMAGE_TAG}|${ECR_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}|g' ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
                     
                     echo "Updating Deployment.yaml at ${MANIFESTS_PATH}/htmllatestpagedeployment.yaml"
-
                     echo "BUILDNUMBER898998  ${IMAGE_TAG}"
 
                 }
