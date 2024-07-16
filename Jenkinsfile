@@ -47,15 +47,12 @@ pipeline {
             }
         }
 
+
         stage('Deploy to Kubernetes') {
             steps {
-                echo 'Deploying to Kubernetes...'
                 script {
-                    // Load kubeconfig from Jenkins credentials
-                    withCredentials([file(credentialsId: 'kubeconfig-creds', variable: 'KUBECONFIG')]) {
-                        // Set KUBECONFIG environment variable
-                        sh "export KUBECONFIG=\$KUBECONFIG"
-                        
+                    // Set KUBECONFIG environment variable
+                    withEnv(['KUBECONFIG=$KUBECONFIG']) {
                         // Apply Kubernetes deployment and service manifests
                         sh "kubectl apply -f path/to/your/deployment.yaml"
                         sh "kubectl apply -f path/to/your/service.yaml"
@@ -63,6 +60,7 @@ pipeline {
                 }
             }
         }
+    
         
         stage('Automated Tests') {
             steps {
