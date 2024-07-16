@@ -44,7 +44,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    withEnv(['KUBECONFIG=${KUBE_CONFIG}']) {
+                    withEnv(['KUBECONFIG=/var/lib/jenkins/.kube/config']) {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                                           credentialsId: AWS_CREDENTIALS_ID,
                                           accessKeyVariable: 'AWS_ACCESS_KEY_ID',
