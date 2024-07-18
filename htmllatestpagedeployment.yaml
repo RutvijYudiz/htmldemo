@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: htmllatestpage-deployment
+  labels:
+    app: htmllatestpage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: htmllatestpage
+  template:
+    metadata:
+      labels:
+        app: htmllatestpage
+    spec:
+      containers:
+        - name: htmllatestpage
+          image: 851725603941.dkr.ecr.ap-south-1.amazonaws.com/htmllatestpage:latest  # Default image
+          imagePullPolicy: Always  # Ensure the latest image is pulled
+          ports:
+            - containerPort: 80  # Expose the necessary port
